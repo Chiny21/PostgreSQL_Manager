@@ -1,0 +1,18 @@
+require 'open-uri'
+
+class API
+
+  def initialize
+    @apiKey = '2ea7a586140f816214ffb5f55a9ca12f'
+  end
+
+  def getWeather(cityName)
+    weatherForecast = open('http://api.openweathermap.org/data/2.5/forecast?q=' + cityName + '&APPID=' + @apiKey)
+    puts 'Weather data requested.'
+    response = weatherForecast.read
+  end
+
+end
+
+#theAPI = API.new
+#puts theAPI.getWeather('707860')

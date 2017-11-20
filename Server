@@ -1,0 +1,60 @@
+require 'net/ssh'
+require 'net/scp'
+require 'net/sftp'
+
+class Server
+
+  def initialize(hostaddr, username, password)
+    @hostaddr = hostaddr
+    @username = username
+    @password = password
+  end
+
+  def needsSpace?
+    itNeeds = false
+    output = nil
+    Net::SSH.start(@hostaddr, @username, :password => @password) do |ssh|
+      output = ssh.exec!('df -h /dev/sda1')
+    end
+    theMatch = /[3,9][1-9]%/ =~ output
+    if theMatch != nil
+      itNeeds = true
+    end
+    itNeeds
+  end
+
+  def createBackup
+    Net::SSH.start(@hostaddr, @username, :password => @password) do |ssh|
+      output = ssh.exec!('pg_dump postgres > /home/sysadmin/postgres.sql')
+    end
+    puts 'Backup created.'
+  end
+
+  def downloadBackup
+    Net::SCP.start(@hostaddr, @username, :password => @password) do |scp|
+      scp.download('/home/sysadmin/postgres.sql', 'C:\Users\Joshua\Desktop')
+    end
+    puts 'Backup downloaded.'
+  end
+
+  def removeBackupFile
+    Net::SFTP.start(@hostaddr, @username, :password => @password) do |sftp|
+      sftp.remove!('/home/sysadmin/postgres.sql')
+    end
+    puts 'File removed.'
+  end
+
+  def clean
+    Net::SSH.start(@hostaddr, @username, :password => @password) do |ssh|
+      output = ssh.exec!('sudo apt-get clean')
+    end
+    puts 'Server cleaned.'
+  end
+
+end
+
+#theServer = Server.new('192.168.1.12', 'sysadmin', 'sysadmin1')
+#puts theServer.needsSpace?
+#theServer.createBackup
+#theServer.downloadBackup
+#theServer.removeBackupFile

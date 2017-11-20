@@ -1,0 +1,52 @@
+load 'Database'
+load 'Server'
+load 'Localhost'
+load 'API'
+
+begin
+  theDatabase = Database.new('postgres', 'sysadmin', 'sysadmin1', '192.168.1.12', '5432')
+  theDatabase.connect
+
+  theServer = Server.new('192.168.1.12', 'sysadmin', 'sysadmin1')
+
+  theLocalhost = Localhost.new
+
+  theAPI = API.new
+end
+
+while true
+
+  theSeconds = '00'
+
+  if DateTime.now.strftime("%S") != theSeconds
+    theWeather = theAPI.getWeather('London')
+    theDatabase.insertLog('Weather data requested.')
+    theDatabase.insertWeather(theWeather)
+    theDatabase.insertLog('Weather row inserted.')
+    theSeconds = DateTime.now.strftime("%S")
+  end
+
+  theProcesses = theLocalhost.getProcesses
+  theDatabase.insertLog('Process data requested.')
+  theDatabase.insertProcesses(theProcesses)
+  theDatabase.insertLog('Process table inserted.')
+
+  theData = theLocalhost.getNetworkActivity
+  theDatabase.insertLog('Network data requested.')
+  theDatabase.insertNetworkActivity(theData)
+  theDatabase.insertLog('Network row inserted.')
+
+  itNeeds = theServer.needsSpace?
+  if itNeeds == true
+    theServer.createBackup
+    theDatabase.insertLog('Backup created.')
+    theServer.downloadBackup
+    theDatabase.insertLog('Backup downloaded.')
+    theServer.removeBackupFile
+    theDatabase.insertLog('Backup file removed.')
+    theDatabase.emptyTables(['weather','process','network'])
+    theServer.clean
+    theDatabase.insertLog('Database emptied.')
+  end
+
+end

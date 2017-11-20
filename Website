@@ -1,0 +1,16 @@
+require 'cgi'
+require 'pg'
+
+cgi = CGI.new
+
+def connect(dbname, user, password, hostaddr, port)
+  @theConnection = PG::Connection.open(:dbname => dbname, :user => user, :password => password,
+                                       :hostaddr => hostaddr, :port => port)
+rescue PG::ConnectionBad => theError
+  puts theError
+end
+
+connect('postgres', 'sysadmin', 'sysadmin1', '127.0.0.1', '5432')
+theLog = @theConnection.exec('SELECT * FROM log ORDER BY datetime ASC LIMIT 50')
+
+puts theLog

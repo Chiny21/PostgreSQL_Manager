@@ -1,0 +1,31 @@
+require 'sys/proctable'
+require 'socket'
+include Sys
+
+class Localhost
+
+  def getProcesses
+    theTable = []
+    ProcTable.ps{ |p|
+      theTable.push(p.pid.to_s)
+      theTable.push(p.comm)
+    }
+    theTable
+  end
+
+  def getNetworkActivity
+    theTable = []
+    theHostName = Socket.gethostname
+    theTable.push(theHostName)
+    theInterfaceAdress = Socket.getifaddrs.to_s
+    theTable.push(theInterfaceAdress)
+    theIpAddressList = Socket.ip_address_list
+    theTable.push(theIpAddressList.to_s)
+    theTable
+  end
+
+end
+
+#theLocalhost = Localhost.new
+#puts theLocalhost.getProcesses
+#puts theLocalhost.getNetworkActivity

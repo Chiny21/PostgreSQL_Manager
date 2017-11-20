@@ -1,0 +1,69 @@
+require 'pg'
+
+class Database
+
+  def initialize(dbname, user, password, hostaddr, port)
+    @dbname = dbname
+    @user = user
+    @password = password
+    @hostaddr = hostaddr
+    @port = port
+    @theConnection = nil
+  end
+
+  def connect
+    @theConnection = PG::Connection.open(:dbname => @dbname, :user => @user, :password => @password,
+                                        :hostaddr => @hostaddr, :port => @port)
+    puts "Connected to database."
+  rescue PG::ConnectionBad => theError
+    puts theError
+  end
+
+  def disconnect
+    @theConnection.close
+    puts 'Disconnected from database.'
+  rescue NoMethodError => theError
+    puts 'Error: No database connection available to close.'
+  end
+
+  def insertWeather(theJSON)
+    theDatetime = DateTime.now.strftime("%m/%d/%Y %l:%M:%S")
+    @theConnection.exec("INSERT INTO weather VALUES ('" + theDatetime.to_s + "', '" + theJSON.to_s + "');")
+    puts 'Weather row inserted.'
+  end
+
+  def insertProcesses(theArray)
+    theLength = theArray.length / 2
+    theCounter = 0
+    while theCounter < theLength
+      theDatetime = DateTime.now.strftime("%m/%d/%Y %l:%M:%S:%L")
+      @theConnection.exec("INSERT INTO process VALUES ('" + theDatetime.to_s + "', '" + theArray[theCounter] + "', '" + theArray[theCounter+1] + "');")
+      theCounter += 2
+    end
+    puts 'Process table inserted.'
+  end
+
+  def insertNetworkActivity(theArray)
+      theDatetime = DateTime.now.strftime("%m/%d/%Y %l:%M:%S:%L")
+      @theConnection.exec("INSERT INTO network VALUES ('" + theDatetime.to_s + "', '" + theArray[0] + "', '" + theArray[1] + "', '" + theArray[2] + "');")
+      puts 'Network row inserted.'
+  end
+
+  def insertLog(theAction)
+    theDatetime = DateTime.now.strftime("%m/%d/%Y %l:%M:%S:%L")
+    @theConnection.exec("INSERT INTO log VALUES ('" + theDatetime.to_s + "', '" + theAction + "');")
+  end
+
+  def emptyTables(tableNames)
+    tableNames.each { |tableName|
+      @theConnection.exec('TRUNCATE ' + tableName + ' CASCADE;')
+    }
+    puts 'All tables emptied.'
+  end
+
+end
+
+# theDatabase = Database.new('postgres', 'sysadmin', 'sysadmin1', '192.168.1.12', '5432')
+# theDatabase.connect
+# theDatabase.emptyTables('test')
+# theDatabase.emptyTables(['weather','process','network'])
