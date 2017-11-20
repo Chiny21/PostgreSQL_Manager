@@ -24,6 +24,10 @@ class Localhost
     theTable
   end
 
+  def saveLog(theData)
+    File.open("C:\Users\Joshua\Desktop\Logs.txt", "w") { |file| file.write(theTable)}
+  end
+
 end
 
 #theLocalhost = Localhost.new

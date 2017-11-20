@@ -54,6 +54,10 @@ class Database
     @theConnection.exec("INSERT INTO log VALUES ('" + theDatetime.to_s + "', '" + theAction + "');")
   end
 
+  def selectLog
+    theLog = @theConnection.exec('SELECT * FROM log ORDER BY datetime ASC LIMIT 200')
+  end
+
   def emptyTables(tableNames)
     tableNames.each { |tableName|
       @theConnection.exec('TRUNCATE ' + tableName + ' CASCADE;')

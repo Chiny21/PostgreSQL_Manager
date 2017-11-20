@@ -49,4 +49,7 @@ while true
     theDatabase.insertLog('Database emptied.')
   end
 
+  theLog = theDatabase.selectLog
+  theLocalhost.saveLog(theLog)
+
 end
